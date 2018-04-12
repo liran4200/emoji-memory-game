@@ -95,7 +95,7 @@ public class GameActivity extends AppCompatActivity {
             public void onTick(long millisUntilFinished) {
                 currentSecond--;
                 i++;
-                int timer = (int)(i*100/(time/INTERVAL));
+                int timer = i*100/(time/INTERVAL);
                 progBar.setProgress(timer);
                 textTimer.setText(""+currentSecond);
 

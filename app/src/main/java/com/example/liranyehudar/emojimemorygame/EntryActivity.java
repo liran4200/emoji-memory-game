@@ -78,10 +78,7 @@ public class EntryActivity extends AppCompatActivity {
         catch (Exception e){
             return false;
         }
-        if(doubleAge >  0)
-            return true;
-        else
-            return false;
+        return doubleAge > 0;
     }
 
     public void bindUI(){

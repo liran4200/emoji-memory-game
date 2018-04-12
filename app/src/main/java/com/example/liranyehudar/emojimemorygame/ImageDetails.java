@@ -43,9 +43,7 @@ public class ImageDetails {
 
         ImageDetails that = (ImageDetails) o;
 
-        if (backDrawableId != that.backDrawableId)
-            return false;
-        return true;
+        return backDrawableId == that.backDrawableId;
     }
 
 }

@@ -1,26 +1,27 @@
 package com.example.liranyehudar.emojimemorygame;
 
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.media.Image;
-import android.os.AsyncTask;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.constraint.ConstraintLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 public class GameActivity extends AppCompatActivity {
     private int numOfImages;
-    private Integer[] frontImagesReferences; // refernceses to front images for this game
+    // refernceses to front images for this game
+    private Integer[] frontImagesReferences;
+    // referenceses to all the back images
     private Integer[] backImagesReferences = {R.drawable.image1,R.drawable.image2,
                                               R.drawable.image3,R.drawable.image4,
                                               R.drawable.image5,R.drawable.image6,
@@ -30,16 +31,25 @@ public class GameActivity extends AppCompatActivity {
                                               R.drawable.image13,R.drawable.image14,
                                               R.drawable.image15,R.drawable.image16,
                                               R.drawable.image17,R.drawable.image18};
-    private Integer[] currentBackImagesReferences; // refernceses to back images for this game
-    private ImageDetails[] backImagesDetails;
+    // refernceses to back images for this game up to the num of images
+    private Integer[] currentBackImagesReferences;
 
-    private ImageDetails imageSelected1;
-    private ImageDetails imageSelected2;
+    private GameBoard board;
     private ImageView imageViewSelected1;
     private ImageView imageViewSelected2;
-
     private int frontImageId = R.drawable.question;
     private boolean isBusy = false;
+
+    private TextView textTimer;
+    private ProgressBar progBar;
+    private ConstraintLayout constLayout;
+    private GridView myGrid;
+    private CountDownTimer mCountDownTimer;
+    private TextView textName;
+    private int i=0;
+    private int currentSecond;
+    private int time;
+    final static int INTERVAL = 1000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,22 +58,25 @@ public class GameActivity extends AppCompatActivity {
         Intent intent = getIntent();
         int rowNum = intent.getIntExtra("row",-1);
         int colNum = intent.getIntExtra("col", -1);
+        String name = intent.getStringExtra("name");
+        time = intent.getIntExtra("time",-1);
+        currentSecond = time/INTERVAL;
 
         numOfImages = rowNum*colNum;
         frontImagesReferences = new Integer[numOfImages];
         currentBackImagesReferences = new Integer[numOfImages/2]; // num Of Images/2 - every image appear 2 times
-        backImagesDetails = new ImageDetails[numOfImages];
+        board = new GameBoard(numOfImages);
 
         initCurrentBackImages();
         initFrontImages();
-        initBackImagesDetails();
-        shuffle();
+        addImagesToGameBoard();
+        board.shuffle();
 
-        ConstraintLayout constLayout = findViewById(R.id.constraint_board);
-        GridView myGrid = findViewById(R.id.gridview);
+        bindUI();
         int height = constLayout.getLayoutParams().height;
         int width = constLayout.getLayoutParams().width;
 
+        textName.setText(name);
         myGrid.setNumColumns(rowNum);
         myGrid.setAdapter(new ImageAdapter(this,height,width,rowNum,colNum,frontImagesReferences));
 
@@ -74,85 +87,107 @@ public class GameActivity extends AppCompatActivity {
                 checkBackImagesMatching(img,position);
             }
         });
+
+        textTimer.setText(""+currentSecond);
+        progBar.setProgress(i);
+        mCountDownTimer = new CountDownTimer(time,INTERVAL) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                currentSecond--;
+                i++;
+                int timer = (int)(i*100/(time/INTERVAL));
+                progBar.setProgress(timer);
+                textTimer.setText(""+currentSecond);
+
+            }
+
+            @Override
+            public void onFinish() {
+                i++;
+                progBar.setProgress(100);
+                textTimer.setText(""+0);
+                showDialogMessage("Time over, please try again","Timer");
+            }
+        };
+
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mCountDownTimer.start();
+            }
+        },900);
+
     }
 
+    public void bindUI(){
+        constLayout = findViewById(R.id.constraint_board);
+        textTimer   = findViewById(R.id.txt_timer);
+        textName   = findViewById(R.id.txt_name);
+        progBar     = findViewById(R.id.progressBar);
+        myGrid      = findViewById(R.id.gridview);
+    }
+
+    /**
+     * This function check if 2 selected images on the board are match.
+     * Checks if the player win.
+     * @param img
+     * @param position
+     */
     public void checkBackImagesMatching(ImageView img,int position){
             if(isBusy)
                 return;
 
-            if(imageSelected1 == null) {
-                imageSelected1 = backImagesDetails[position];
-                if(!imageSelected1.isFlipped()) {
+            if(!board.isImageSelected(0)) {
+                board.setImageSelectedFirstByIndex(position);
+                if(!board.flipFirst()) {
                     imageViewSelected1 = img;
-                    imageViewSelected1.setImageResource(imageSelected1.getBackDrawableId());
-                    imageSelected1.setFlipped(true);
+                    imageViewSelected1.setImageResource(board.getDrawableId(0));
                 }
-                else {
-                    imageSelected1 = null;
-                    return;
-                }
+                else return;
             }
-            if(imageSelected2 == null) {
-                imageSelected2 = backImagesDetails[position];
-                if (!imageSelected2.isFlipped()) {
+            if(!board.isImageSelected(1)) {
+                board.setImageSelectedSecondByIndex(position);
+                if (!board.flipSecond()) {
                     imageViewSelected2 = img;
-                    imageViewSelected2.setImageResource(imageSelected2.getBackDrawableId());
-                    imageSelected2.setFlipped(true);
-                } else {
-                    imageSelected2 = null;
-                    return;
+                    imageViewSelected2.setImageResource(board.getDrawableId(1));
                 }
+                else return;
 
-                // do in background check with delay;
-                if (imageSelected1.equals(imageSelected2)) {
-                    imageSelected1.setMatch(true);
-                    imageSelected2.setMatch(true);
+
+
+                if (board.isSelectedImagesMatching()) {
                     if (checkWinGame()) {
-                        Toast.makeText(GameActivity.this, "You Win!",
-                                Toast.LENGTH_SHORT).show();
-                        finish();
+                        mCountDownTimer.cancel(); // canacel timer
+                        showDialogMessage("You win!","Congratulations");
                     }
-                    imageSelected1 = null;
-                    imageSelected2 = null;
                 } else {
+                    // do it in the background ;
                     isBusy = true;
                     final Handler handler = new Handler();
                     handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            imageSelected1.setFlipped(false);
-                            imageSelected2.setFlipped(false);
+                            board.resetSelectedImages();
                             imageViewSelected1.setImageResource(frontImageId);
                             imageViewSelected2.setImageResource(frontImageId);
-                            imageSelected1 = null;
-                            imageSelected2 = null;
                             isBusy = false;
                         }
-                    },700);
+                    },1000);
                 }
             }
     }
 
     public boolean checkWinGame(){
-        for(int i = 0 ; i < backImagesDetails.length; i ++ ){
-            if(!backImagesDetails[i].isMatch())
-                return false;
-        }
-        return true;
+        return board.isAllImagesMatch();
     }
 
-    public void shuffle(){
-        List<ImageDetails> listBackImages = Arrays.asList(backImagesDetails);
-        Collections.shuffle(listBackImages);
-        backImagesDetails = (ImageDetails[]) listBackImages.toArray();
-    }
-
-    public void initBackImagesDetails(){
+    public void addImagesToGameBoard(){
         int countCurrentBackImages = 0;
-        for(int i = 0; i < backImagesDetails.length; i ++){
+        for(int i = 0; i < numOfImages; i ++){
             if(countCurrentBackImages == currentBackImagesReferences.length)
                 countCurrentBackImages = 0;
-            backImagesDetails[i] = new ImageDetails(currentBackImagesReferences[countCurrentBackImages]);
+            board.addImage(currentBackImagesReferences[countCurrentBackImages]);
             countCurrentBackImages++;
         }
     }
@@ -167,5 +202,25 @@ public class GameActivity extends AppCompatActivity {
     public void initFrontImages(){
         for(int i = 0 ; i < numOfImages; i ++)
             frontImagesReferences[i] = frontImageId;
+    }
+
+    public void onBackPressed() {
+        mCountDownTimer.cancel();
+       super.onBackPressed();
+    }
+
+    public void showDialogMessage(String message,String title){
+        AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(GameActivity.this);
+        dlgAlert.setMessage(message);
+        dlgAlert.setTitle(title);
+        dlgAlert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                finish();
+            }
+
+        });
+        dlgAlert.setCancelable(false);
+        dlgAlert.create().show();
     }
 }

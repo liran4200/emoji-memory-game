@@ -13,7 +13,7 @@ public class EntryActivity extends AppCompatActivity {
 
     private EditText edtName;
     private EditText edtAge;
-    private Button btnNext;
+    private Button btnPlay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,11 +22,11 @@ public class EntryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_entry);
 
         bindUI();
-        btnNext.setOnClickListener(new View.OnClickListener() {
+        btnPlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String name = edtName.getText().toString();
-                String age  = edtAge.getText().toString();
+                String name = edtName.getText().toString().trim();
+                String age  = edtAge.getText().toString().trim();
 
                 boolean validName = isValidName(name);
                 boolean validAge  = isValidAge(age);
@@ -62,7 +62,7 @@ public class EntryActivity extends AppCompatActivity {
         dlgAlert.setMessage(message);
         dlgAlert.setTitle("Error Message");
         dlgAlert.setPositiveButton("OK", null);
-        dlgAlert.setCancelable(true);
+        dlgAlert.setCancelable(false);
         dlgAlert.create().show();
     }
 
@@ -87,6 +87,6 @@ public class EntryActivity extends AppCompatActivity {
     public void bindUI(){
         edtName = findViewById(R.id.edit_name);
         edtAge  = findViewById(R.id.edit_age);
-        btnNext = findViewById(R.id.btn_next);
+        btnPlay = findViewById(R.id.btn_play);
     }
 }

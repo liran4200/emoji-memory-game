@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 
 public class GameActivity extends AppCompatActivity {
+    final static int INTERVAL = 1000;
     private int numOfImages;
     // refernceses to front images for this game
     private Integer[] frontImagesReferences;
@@ -35,34 +36,32 @@ public class GameActivity extends AppCompatActivity {
     private Integer[] currentBackImagesReferences;
 
     private GameBoard board;
-    private ImageView imageViewSelected1;
-    private ImageView imageViewSelected2;
     private int frontImageId = R.drawable.question;
     private boolean isBusy = false;
 
+    private String name;
+    private int rowNum,colNum;
+    private int points;
+    private int results;
+
+    private ImageView imageViewSelected1;
+    private ImageView imageViewSelected2;
     private TextView textTimer;
-    private ProgressBar progBar;
+    private TextView textName;
     private ConstraintLayout constLayout;
     private GridView myGrid;
     private CountDownTimer mCountDownTimer;
-    private TextView textName;
-    private int i=0;
+    private ProgressBar progBar;
+    private int i = 0;
     private int currentSecond;
     private int time;
-    final static int INTERVAL = 1000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
-        Intent intent = getIntent();
-        int rowNum = intent.getIntExtra("row",-1);
-        int colNum = intent.getIntExtra("col", -1);
-        String name = intent.getStringExtra("name");
-        time = intent.getIntExtra("time",-1);
-        currentSecond = time/INTERVAL;
 
-        numOfImages = rowNum*colNum;
+        getParametersByIntent();
         frontImagesReferences = new Integer[numOfImages];
         currentBackImagesReferences = new Integer[numOfImages/2]; // num Of Images/2 - every image appear 2 times
         board = new GameBoard(numOfImages);
@@ -73,6 +72,7 @@ public class GameActivity extends AppCompatActivity {
         board.shuffle();
 
         bindUI();
+        currentSecond = time/INTERVAL;
         int height = constLayout.getLayoutParams().height;
         int width = constLayout.getLayoutParams().width;
 
@@ -117,7 +117,16 @@ public class GameActivity extends AppCompatActivity {
                 mCountDownTimer.start();
             }
         },900);
+    }
 
+    public void getParametersByIntent(){
+        Intent intent = getIntent();
+        rowNum = intent.getIntExtra("row",-1);
+        colNum = intent.getIntExtra("col", -1);
+        name = intent.getStringExtra("name");
+        time = intent.getIntExtra("time",-1);
+        points = intent.getIntExtra("point",-1);
+        numOfImages = rowNum*colNum;
     }
 
     public void bindUI(){
@@ -149,6 +158,7 @@ public class GameActivity extends AppCompatActivity {
             if(!board.isImageSelected(1)) {
                 board.setImageSelectedSecondByIndex(position);
                 if (!board.flipSecond()) {
+                    results -= points/4; // not matching
                     imageViewSelected2 = img;
                     imageViewSelected2.setImageResource(board.getDrawableId(1));
                 }
@@ -157,9 +167,13 @@ public class GameActivity extends AppCompatActivity {
 
 
                 if (board.isSelectedImagesMatching()) {
+                    results += points; // matching
                     if (checkWinGame()) {
                         mCountDownTimer.cancel(); // canacel timer
-                        showDialogMessage("You win!","Congratulations");
+                        Intent resultIntent = new Intent();
+                        resultIntent.putExtra("result", results+"");
+                        setResult(RESULT_OK, resultIntent);
+                        showDialogMessage("You win!, your score is "+results,"Congratulations");
                     }
                 } else {
                     // do it in the background ;
@@ -173,7 +187,7 @@ public class GameActivity extends AppCompatActivity {
                             imageViewSelected2.setImageResource(frontImageId);
                             isBusy = false;
                         }
-                    },1000);
+                    },800);
                 }
             }
     }

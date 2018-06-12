@@ -26,11 +26,11 @@ public class DBHandler extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         //create player table
-        String CREATE_PLAYER_DETAILS_TABLE = "CREATE TABLE " + TABLE_PLAYER + "("
-                + KEY_ID + "INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + KEY_NAME + "TEXT,"
-                + KEY_AGE + "INTEGER,"
-                + KEY_RESULT + "INTEGER " + ")";
+        String CREATE_PLAYER_DETAILS_TABLE = "CREATE TABLE " + TABLE_PLAYER + " ("
+                + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + KEY_NAME + " VARCHAR(255),"
+                + KEY_AGE + " INTEGER,"
+                + KEY_RESULT + " INTEGER " + ")";
 
         db.execSQL(CREATE_PLAYER_DETAILS_TABLE);
     }
@@ -54,19 +54,25 @@ public class DBHandler extends SQLiteOpenHelper {
         return (res!= -1);
     }
 
-    public boolean updateData(String id,String name,int age, int result) {
+    public void updateData(String id,String name,int age, int result) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(KEY_NAME,name);
         values.put(KEY_AGE,age);
         values.put(KEY_RESULT,result);
-        db.update(TABLE_PLAYER, values, "ID = ?",new String[] { id });
-
-        return true;
+        db.update(TABLE_PLAYER, values, KEY_ID+" = ?",new String[]{id});
     }
 
     public Cursor getAllData() {
         SQLiteDatabase db = this.getWritableDatabase();
-        return  db.rawQuery("select * from "+ TABLE_PLAYER, null);
+        return  db.rawQuery("SELECT * FROM "+ TABLE_PLAYER, null);
     }
+
+    public Cursor findMinByResult() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        return db.rawQuery("SELECT "+KEY_ID+", "+KEY_RESULT+" "
+                + "FROM "+ TABLE_PLAYER+" ORDER BY "+KEY_RESULT
+                + " LIMIT 1;", null);
+    }
+
 }

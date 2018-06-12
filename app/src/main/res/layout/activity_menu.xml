@@ -29,8 +29,8 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:fontFamily="@font/erica_one"
-            android:text="Hey "
-            android:textSize="28dp"
+            android:text="@string/hey"
+            android:textSize="28sp"
             android:textColor="#E6F51B"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -41,9 +41,9 @@
 
     <ListView
         android:id="@+id/listView"
-        android:layout_width="180dp"
-        android:layout_height="170dp"
-        android:layout_marginBottom="136dp"
+        android:layout_width="232dp"
+        android:layout_height="246dp"
+        android:layout_marginBottom="92dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:background="#5500FF"
@@ -51,6 +51,5 @@
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent" />
 </android.support.constraint.ConstraintLayout>

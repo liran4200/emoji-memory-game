@@ -18,6 +18,7 @@
         </activity>
         <activity android:name=".MenuActivity" />
         <activity android:name=".GameActivity"></activity>
+        <activity android:name=".MainActivity"></activity>
 
         <meta-data
             android:name="preloaded_fonts"

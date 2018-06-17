@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -49,7 +50,7 @@ public class EntryActivity extends AppCompatActivity {
                 }
 
                 Player player = new Player(0,name,Integer.parseInt(age),0);
-                Intent i = new Intent(getBaseContext(),MainActivity.class);
+                Intent i = new Intent(getApplicationContext(),MainActivity.class);
                 i.putExtra("Player", player);
                 startActivity(i);
             }
@@ -71,14 +72,14 @@ public class EntryActivity extends AppCompatActivity {
     }
 
     public boolean isValidAge(String age){
-        double  doubleAge = 0;
+        int  intAge = 0;
         try{
-            doubleAge = Double.parseDouble(age);
+            intAge = Integer.parseInt(age);
         }
         catch (Exception e){
             return false;
         }
-        return doubleAge > 0;
+        return intAge > 0;
     }
 
     public void bindUI(){

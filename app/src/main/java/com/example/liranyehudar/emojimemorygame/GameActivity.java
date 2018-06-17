@@ -169,8 +169,10 @@ public class GameActivity extends AppCompatActivity {
                 if (board.isSelectedImagesMatching()) {
                     results += points; // matching
                     if (checkWinGame()) {
-                        mCountDownTimer.cancel(); // canacel timer
+                        mCountDownTimer.cancel(); // cancel timer
                         Intent resultIntent = new Intent();
+                        if(results<0)// only postive points should be in the table
+                            results=0;
                         resultIntent.putExtra("result", results+"");
                         setResult(RESULT_OK, resultIntent);
                         showDialogMessage("You win!, your score is "+results,"Congratulations");

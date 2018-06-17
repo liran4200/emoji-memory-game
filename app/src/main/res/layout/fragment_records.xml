@@ -1,14 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@drawable/background_sky"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="tab_records"/>
+    <de.codecrafters.tableview.TableView xmlns:table="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/tableView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        table:layout_constraintBottom_toBottomOf="parent"
+        table:layout_constraintEnd_toEndOf="parent"
+        table:layout_constraintHorizontal_bias="0.0"
+        table:layout_constraintStart_toStartOf="parent"
+        table:layout_constraintTop_toTopOf="parent"
+        table:layout_constraintVertical_bias="0.0"
+        table:tableView_columnCount="4"
+        table:tableView_headerColor="?attr/colorPrimaryDark" />
 
 </android.support.constraint.ConstraintLayout>

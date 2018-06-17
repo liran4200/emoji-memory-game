@@ -27,6 +27,7 @@ public class FragmentGameMenu extends Fragment {
     private Player player;
     private DBHandler db;
     private Context context;
+    private UpdateData setData;
 
 
     @Nullable
@@ -35,6 +36,8 @@ public class FragmentGameMenu extends Fragment {
     try {
         View view = inflater.inflate(R.layout.fragment_game, container, false);
         context = getActivity();
+
+        setData = (UpdateData) context;
         db = new DBHandler(context);
         player =(Player) this.getArguments().getSerializable("Player");
 
@@ -69,6 +72,7 @@ public class FragmentGameMenu extends Fragment {
         if(requestCode == RESULT_REQUEST) {
             if (resultCode == RESULT_OK) {
                 checkResult(data.getStringExtra("result"));
+                setData.onUpdateData();
             }
         }
     }

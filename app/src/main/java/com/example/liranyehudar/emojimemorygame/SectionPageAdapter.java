@@ -36,4 +36,11 @@ public class SectionPageAdapter extends FragmentPagerAdapter {
     public int getCount() {
         return framentList.size();
     }
+
+    @Override
+    public int getItemPosition(Object object) {
+        return POSITION_NONE;
+    }
+
+
 }

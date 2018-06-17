@@ -48,7 +48,7 @@ public class EntryActivity extends AppCompatActivity {
                     return;
                 }
 
-                Intent i = new Intent(getBaseContext(),MenuActivity.class);
+                Intent i = new Intent(getBaseContext(),MainActivity.class);
                 i.putExtra("name",name);
                 i.putExtra("age",age);
                 startActivity(i);

@@ -48,9 +48,9 @@ public class EntryActivity extends AppCompatActivity {
                     return;
                 }
 
+                Player player = new Player(0,name,Integer.parseInt(age),0);
                 Intent i = new Intent(getBaseContext(),MainActivity.class);
-                i.putExtra("name",name);
-                i.putExtra("age",age);
+                i.putExtra("Player", player);
                 startActivity(i);
             }
         });

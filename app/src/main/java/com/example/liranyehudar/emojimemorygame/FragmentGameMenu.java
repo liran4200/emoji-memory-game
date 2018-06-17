@@ -24,8 +24,7 @@ public class FragmentGameMenu extends Fragment {
     private  int []   levelArr= {2,4,6}; //2x2 , 4x4, 6x6 grid size
     private  int []   timer = {30000,45000,60000}; // millsecond for timer
     private  int []   getPointsFromOneMatching = {20,40,60}; //by the level,get point to final result if there is 2 card matching.
-    private  String name;
-    private  String age;
+    private Player player;
     private DBHandler db;
     private Context context;
 
@@ -37,8 +36,8 @@ public class FragmentGameMenu extends Fragment {
         View view = inflater.inflate(R.layout.fragment_game, container, false);
         context = getActivity();
         db = new DBHandler(context);
-        name = this.getArguments().getString("name");
-        age = this.getArguments().getString("age");
+        player =(Player) this.getArguments().getSerializable("Player");
+
         ListView lstView = view.findViewById(R.id.listView);
         ArrayAdapter<String> adapterArr = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, menuArr);
         lstView.setAdapter(adapterArr);
@@ -49,7 +48,7 @@ public class FragmentGameMenu extends Fragment {
                 Intent i = new Intent(context, GameActivity.class);
                 i.putExtra("row", levelArr[position]);
                 i.putExtra("col", levelArr[position]);
-                i.putExtra("name", name);
+                i.putExtra("name", player.getName());
                 i.putExtra("time", timer[position]);
                 i.putExtra("point", getPointsFromOneMatching[position]);
                 startActivityForResult(i, RESULT_REQUEST);
@@ -76,19 +75,19 @@ public class FragmentGameMenu extends Fragment {
 
     public boolean checkResult(String result) {
         int res = Integer.parseInt(result);
-        int currentAge = Integer.parseInt(age);
+        int currentAge = player.getAge();
         Cursor data = db.getAllData();
         Cursor cur = db.findMinByResult();
         int minData = cur.getCount();
         int dataCount = data.getCount();
         if (dataCount < MAX_ROWS)
-            db.insertData(name, currentAge, res);
+            db.insertData(player.getName(), currentAge, res);
         else {
             cur.moveToFirst();
             String s = cur.getString(1);
             int minInTable = Integer.parseInt(cur.getString(1));
             if (res > minInTable) {
-                db.updateData(cur.getString(0), name, currentAge, res);
+                db.updateData(cur.getString(0), player.getName(), currentAge, res);
                 Toast.makeText(context, "updated" + result, Toast.LENGTH_LONG).show();
             } else
                 return false;

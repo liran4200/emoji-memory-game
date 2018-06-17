@@ -10,11 +10,14 @@ import android.view.ViewGroup;
 public class FragmentRecords extends Fragment {
 
     private static final String TAG = "FragmentRecords";
+    DBHandler db ;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_records,container,false);
+        db = new DBHandler(getActivity());
+        
         return view;
     }
 }

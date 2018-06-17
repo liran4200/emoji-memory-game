@@ -13,8 +13,7 @@ public class MainActivity  extends AppCompatActivity {
     private SectionPageAdapter mSectionsPageAdapter;
     private ViewPager mViewPager;
 
-    private  String name;
-    private  String age;
+    private  Player player;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,11 +23,11 @@ public class MainActivity  extends AppCompatActivity {
             setContentView(R.layout.activity_main);
 
             Intent intent = getIntent();
-            name = intent.getStringExtra("name");
-            age = intent.getStringExtra("age");
+            player = (Player) intent.getSerializableExtra("Player");
+
 
             TextView details = findViewById(R.id.text_view_details);
-            details.setText(name + ", " + age);
+            details.setText(player.getName() + ", " + player.getAge());
 
 
             mViewPager = (ViewPager) findViewById(R.id.container);
@@ -55,10 +54,9 @@ public class MainActivity  extends AppCompatActivity {
         mSectionsPageAdapter.addFragment(fragInfo,"Game Menu");
         mSectionsPageAdapter.addFragment(new FragmentRecords(),"Table Of Records");
         mSectionsPageAdapter.addFragment(new FragmentMapRecords(),"Map Records");
-        Bundle bundle = new Bundle();
 
-        bundle.putString("name", name );
-        bundle.putString("age", age );
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("Player",player);
         fragInfo.setArguments(bundle);
         viewPager.setAdapter(mSectionsPageAdapter);
     }

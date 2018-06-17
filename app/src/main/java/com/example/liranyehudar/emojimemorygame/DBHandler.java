@@ -9,6 +9,7 @@ import java.util.List;
 
 public class DBHandler extends SQLiteOpenHelper {
 
+    //database version
     private static final int DB_VERSION = 1;
     //database name
     private static final String DB_NAME = "memoryGame";

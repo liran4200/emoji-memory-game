@@ -20,7 +20,9 @@ public class DBHandler extends SQLiteOpenHelper {
     private static final String KEY_AGE = "age";
     private static final String KEY_NAME = "name";
     private static final String KEY_RESULT = "result";
-    // location will add later.
+    private static final String KEY_LATITUDE = "latitude";
+    private static final String KEY_LONGITUDE = "longitude";
+
 
     public DBHandler(Context context){
         super(context,DB_NAME,null,DB_VERSION);
@@ -33,7 +35,9 @@ public class DBHandler extends SQLiteOpenHelper {
                 + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + KEY_NAME + " VARCHAR(255),"
                 + KEY_AGE + " INTEGER,"
-                + KEY_RESULT + " INTEGER " + ")";
+                + KEY_RESULT + " INTEGER, "
+                + KEY_LATITUDE + " DOUBLE, "
+                + KEY_LONGITUDE + " DOUBLE "+ ")";
 
         db.execSQL(CREATE_PLAYER_DETAILS_TABLE);
     }
@@ -47,28 +51,32 @@ public class DBHandler extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public boolean insertData(String name,int age, int result){
+    public boolean insertData(String name,int age, int result, double latitude, double longitude){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues  values =  new ContentValues();
         values.put(KEY_NAME,name);
         values.put(KEY_AGE,age);
         values.put(KEY_RESULT,result);
+        values.put(KEY_LATITUDE,latitude);
+        values.put(KEY_LONGITUDE,longitude);
         long res = db.insert(TABLE_PLAYER, null, values);
         return (res!= -1);
     }
 
-    public void updateData(String id,String name,int age, int result) {
+    public void updateData(String id,String name,int age, int result, double latitude, double longitude) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(KEY_NAME,name);
         values.put(KEY_AGE,age);
         values.put(KEY_RESULT,result);
+        values.put(KEY_LATITUDE,latitude);
+        values.put(KEY_LONGITUDE,longitude);
         db.update(TABLE_PLAYER, values, KEY_ID+" = ?",new String[]{id});
     }
 
     public Cursor getAllData() {
         SQLiteDatabase db = this.getWritableDatabase();
-        return  db.rawQuery("SELECT * FROM "+ TABLE_PLAYER, null);
+        return  db.rawQuery("SELECT * FROM "+ TABLE_PLAYER +" ORDER BY " +KEY_RESULT+ " DESC", null);
     }
 
     public Cursor findMinByResult() {

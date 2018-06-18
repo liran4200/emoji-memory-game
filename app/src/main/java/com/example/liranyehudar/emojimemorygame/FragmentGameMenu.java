@@ -71,13 +71,16 @@ public class FragmentGameMenu extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == RESULT_REQUEST) {
             if (resultCode == RESULT_OK) {
-                checkResult(data.getStringExtra("result"));
+                String result = data.getStringExtra("result");
+                double latitude = data.getDoubleExtra("latitude",-1);
+                double longitude = data.getDoubleExtra("longitude",-1);
+                checkResult(result,latitude,longitude);
                 setData.onUpdateData();
             }
         }
     }
 
-    public boolean checkResult(String result) {
+    public boolean checkResult(String result, double latitude, double longitude) {
         int res = Integer.parseInt(result);
         int currentAge = player.getAge();
         Cursor data = db.getAllData();
@@ -85,13 +88,13 @@ public class FragmentGameMenu extends Fragment {
         int minData = cur.getCount();
         int dataCount = data.getCount();
         if (dataCount < MAX_ROWS)
-            db.insertData(player.getName(), currentAge, res);
+            db.insertData(player.getName(), currentAge, res,latitude, longitude);
         else {
             cur.moveToFirst();
             String s = cur.getString(1);
             int minInTable = Integer.parseInt(cur.getString(1));
             if (res > minInTable) {
-                db.updateData(cur.getString(0), player.getName(), currentAge, res);
+                db.updateData(cur.getString(0), player.getName(), currentAge, res,latitude,longitude);
                 Toast.makeText(context, "updated" + result, Toast.LENGTH_LONG).show();
             } else
                 return false;

@@ -64,6 +64,7 @@ public class GameBoard {
             imageSelectedSecond = null;
             return true;
         }
+
         return false;
     }
 

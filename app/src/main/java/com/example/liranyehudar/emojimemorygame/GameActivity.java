@@ -1,10 +1,17 @@
 package com.example.liranyehudar.emojimemorygame;
 
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.os.IBinder;
 import android.support.constraint.ConstraintLayout;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,7 +21,6 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 
 public class GameActivity extends AppCompatActivity {
@@ -34,6 +40,8 @@ public class GameActivity extends AppCompatActivity {
                                               R.drawable.image17,R.drawable.image18};
     // refernceses to back images for this game up to the num of images
     private Integer[] currentBackImagesReferences;
+
+
 
     private GameBoard board;
     private int frontImageId = R.drawable.question;
@@ -55,6 +63,8 @@ public class GameActivity extends AppCompatActivity {
     private int i = 0;
     private int currentSecond;
     private int time;
+    private boolean isBind = false;
+    public MemoryGameService.SensorBind binder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,8 +127,40 @@ public class GameActivity extends AppCompatActivity {
                 mCountDownTimer.start();
             }
         },900);
+        bindService(new Intent(this, MemoryGameService.class), bindService, Context.BIND_AUTO_CREATE);
+        LocalBroadcastManager.getInstance(this).registerReceiver(msg, new IntentFilter(getString(R.string.change_str)));
     }
 
+    private ServiceConnection bindService = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            binder = (MemoryGameService.SensorBind) iBinder;
+            isBind = true;
+            binder.notifyService(getString(R.string.listen_message));
+        }
+
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            isBind = false;
+        }
+
+    };
+    private BroadcastReceiver msg = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            boolean state = intent.getBooleanExtra(getString(R.string.right_str), true);
+            if (state) {
+                return;
+            }
+
+           // 1. UI activty sturcture: operate function on sturct list, imageview1.setResource(frontImage) , imageview2.setRe....
+            // logic : gameboard.flipBack , - imageDetail.setFlip(true), iamgedetail2.setFlip , setMatch
+
+
+        }
+
+    };
     public void getParametersByIntent(){
         Intent intent = getIntent();
         rowNum = intent.getIntExtra("row",-1);
@@ -152,7 +194,7 @@ public class GameActivity extends AppCompatActivity {
                 if(!board.flipFirst()) {
                     imageViewSelected1 = img;
                     imageViewSelected1.setImageResource(board.getDrawableId(0));
-                }
+            }
                 else return;
             }
             if(!board.isImageSelected(1)) {
@@ -168,6 +210,8 @@ public class GameActivity extends AppCompatActivity {
 
                 if (board.isSelectedImagesMatching()) {
                     results += points; // matching
+                    // add to sturct list.
+                    // gameboard.addimagedetails
                     if (checkWinGame()) {
                         mCountDownTimer.cancel(); // cancel timer
                         Intent resultIntent = new Intent();

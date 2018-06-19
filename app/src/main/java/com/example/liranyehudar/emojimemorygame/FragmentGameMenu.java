@@ -16,10 +16,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 public class FragmentGameMenu extends Fragment {
-
-    static final int RESULT_REQUEST = 1;
     static final int MAX_ROWS = 10;
-    static final int RESULT_OK = -1;
     private  String[] menuArr = {"Easy - 2x2","Medium - 4x4","Hard - 6x6"};
     private  int []   levelArr= {2,4,6}; //2x2 , 4x4, 6x6 grid size
     private  int []   timer = {30000,45000,60000}; // millsecond for timer
@@ -28,7 +25,8 @@ public class FragmentGameMenu extends Fragment {
     private DBHandler db;
     private Context context;
     private UpdateData setData;
-
+    private int resultRequested;
+    private int resultOk;
 
     @Nullable
     @Override
@@ -40,6 +38,8 @@ public class FragmentGameMenu extends Fragment {
         setData = (UpdateData) context;
         db = new DBHandler(context);
         player =(Player) this.getArguments().getSerializable("Player");
+        resultRequested = this.getArguments().getInt("result_request");
+        resultOk = this.getArguments().getInt("result_ok");
 
         ListView lstView = view.findViewById(R.id.listView);
         ArrayAdapter<String> adapterArr = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, menuArr);
@@ -54,7 +54,7 @@ public class FragmentGameMenu extends Fragment {
                 i.putExtra("name", player.getName());
                 i.putExtra("time", timer[position]);
                 i.putExtra("point", getPointsFromOneMatching[position]);
-                startActivityForResult(i, RESULT_REQUEST);
+                startActivityForResult(i, resultRequested);
             }
         });
         return view;
@@ -69,8 +69,8 @@ public class FragmentGameMenu extends Fragment {
     // get result from game
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == RESULT_REQUEST) {
-            if (resultCode == RESULT_OK) {
+        if(requestCode == resultRequested) {
+            if (resultCode == resultOk) {
                 String result = data.getStringExtra("result");
                 double latitude = data.getDoubleExtra("latitude",-1);
                 double longitude = data.getDoubleExtra("longitude",-1);

@@ -16,11 +16,13 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity implements UpdateData {
+
+    static final int RESULT_REQUEST = 1;
+    static final int RESULT_OK = -1;
 
     private SectionPageAdapter mSectionsPageAdapter;
     LocationManager mLocationManager;
@@ -71,7 +73,7 @@ public class MainActivity extends AppCompatActivity implements UpdateData {
                     PackageManager.PERMISSION_GRANTED
                     && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED) {
-                
+
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},1);
             }
             else {
@@ -102,8 +104,10 @@ public class MainActivity extends AppCompatActivity implements UpdateData {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        data.putExtra("latitude",latitude);
-        data.putExtra("longitude",longitude);
+        if(data !=null) {
+            data.putExtra("latitude", latitude);
+            data.putExtra("longitude", longitude);
+        }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -118,6 +122,8 @@ public class MainActivity extends AppCompatActivity implements UpdateData {
 
         Bundle bundleMenu = new Bundle();
         bundleMenu.putSerializable("Player",player);
+        bundleMenu.putInt("result_request",RESULT_REQUEST);
+        bundleMenu.putInt("result_ok",RESULT_OK);
         fragInfo.setArguments(bundleMenu);
 
         viewPager.setAdapter(mSectionsPageAdapter);

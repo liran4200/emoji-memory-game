@@ -16,12 +16,12 @@ public class DBHandler extends SQLiteOpenHelper {
     //table name
     private static final String TABLE_PLAYER = "playerDetails";
     //contact table name
-    private static final String KEY_ID = "id";
-    private static final String KEY_AGE = "age";
-    private static final String KEY_NAME = "name";
-    private static final String KEY_RESULT = "result";
-    private static final String KEY_LATITUDE = "latitude";
-    private static final String KEY_LONGITUDE = "longitude";
+    static final String KEY_ID = "id";
+    static final String KEY_AGE = "age";
+    static final String KEY_NAME = "name";
+    static final String KEY_RESULT = "result";
+    static final String KEY_LATITUDE = "latitude";
+    static final String KEY_LONGITUDE = "longitude";
 
 
     public DBHandler(Context context){

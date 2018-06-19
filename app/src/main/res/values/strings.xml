@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Emoji Memory Game</string>
     <string name="hey">Hey</string>
-    <string name="change_str">change</string>
-    <string name="right_str">right</string>
+    <string name="change">change</string>
+    <string name="move">move</string>
     <string name="listen_message">Start</string>
 </resources>

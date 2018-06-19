@@ -15,18 +15,18 @@ import android.support.v4.content.LocalBroadcastManager;
 
 public class MemoryGameService extends Service implements SensorEventListener {
     public SensorBind binder = new SensorBind();
-    private Sensor rotationSens;
+    private Sensor rotationVecType;
     private SensorManager sensManager;
     private Handler serviceHandler;
-    private static final int delayForSensor = 100000;
-    private boolean isFirstTime = true;
-    private boolean isSameRotation = true;
+    private static final int delaySensor = 100000;
+    private boolean FirstTime = true;
+    private boolean isSame = true;
     private float y;
     private float z;
     private float x;
     private float[] values = new float[3];
-    private HandlerThread threadSens;
-    private boolean listenerBool = false;
+    private HandlerThread handlerThread;
+    private boolean isListener = false;
 
 
     @Override
@@ -38,14 +38,14 @@ public class MemoryGameService extends Service implements SensorEventListener {
 
     private void initSensor() {
         sensManager = (SensorManager) getSystemService(Activity.SENSOR_SERVICE);
-        rotationSens = sensManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-        sensManager.registerListener(this, rotationSens, delayForSensor);
+        rotationVecType = sensManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+        sensManager.registerListener(this, rotationVecType, delaySensor);
     }
 
     private void initThread() {
-        threadSens = new HandlerThread(MemoryGameService.class.getSimpleName());
-        threadSens.start();
-        serviceHandler = new Handler(threadSens.getLooper());
+        handlerThread = new HandlerThread(MemoryGameService.class.getSimpleName());
+        handlerThread.start();
+        serviceHandler = new Handler(handlerThread.getLooper());
     }
 
 
@@ -61,26 +61,26 @@ public class MemoryGameService extends Service implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent e) {
-        if (e.sensor != rotationSens)
+        if (e.sensor != rotationVecType)
             return;
 
-        float[] rotationArr = new float[9];
-        float[] newRotationArr = new float[9];
-        SensorManager.getRotationMatrixFromVector(rotationArr, e.values);
-        SensorManager.remapCoordinateSystem(rotationArr, SensorManager.AXIS_X, SensorManager.AXIS_Z, newRotationArr);
-        SensorManager.getOrientation(newRotationArr, values);
-        boolean isRotated = true;
-        if (isFirstTime) {
+        float[] arrayRot = new float[9];
+        float[] arrayNewRot = new float[9];
+        SensorManager.getRotationMatrixFromVector(arrayRot, e.values);
+        SensorManager.remapCoordinateSystem(arrayRot, SensorManager.AXIS_X, SensorManager.AXIS_Z, arrayNewRot);
+        SensorManager.getOrientation(arrayNewRot, values);
+        boolean rotated = true;
+        if (FirstTime) {
             this.x = values[0];
             this.y = values[1];
             this.z = values[2];
-            isFirstTime = false;
+            FirstTime = false;
         } else if (isChangeInDirection(x, values[0]) || isChangeInDirection(y, values[1]) || isChangeInDirection(z, values[2]))
-            isRotated = false;
-        if (isRotated != isSameRotation) {
-            isSameRotation = isRotated;
-            Intent intent = new Intent(getString(R.string.change_str));
-            intent.putExtra(getString(R.string.right_str), isRotated);
+            rotated = false;
+        if (rotated != isSame) {
+            isSame = rotated;
+            Intent intent = new Intent(getString(R.string.change));
+            intent.putExtra(getString(R.string.move), rotated);
             LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         }
     }
@@ -105,7 +105,7 @@ public class MemoryGameService extends Service implements SensorEventListener {
 
         }
         try {
-            threadSens.quit();
+            handlerThread.quit();
         } catch (Exception e) {
         }
     }
@@ -120,11 +120,11 @@ public class MemoryGameService extends Service implements SensorEventListener {
         private MemoryGameService theService;
 
         void notifyService(String msg) {
-            if (msg != getString(R.string.listen_message) || listenerBool) return;
-            Sensor s = sensManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-            if (s == null) return;
-            sensManager.registerListener(theService, s, SensorManager.SENSOR_DELAY_UI, serviceHandler);
-            listenerBool = true;
+            if (msg != getString(R.string.listen_message) || isListener) return;
+            Sensor theSensor = sensManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+            if (theSensor == null) return;
+            sensManager.registerListener(theService, theSensor, SensorManager.SENSOR_DELAY_UI, serviceHandler);
+            isListener = true;
         }
     }
 }

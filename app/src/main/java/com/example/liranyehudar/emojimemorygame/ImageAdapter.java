@@ -6,6 +6,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 
+import java.util.ArrayList;
+
 public class ImageAdapter extends BaseAdapter {
     private Context mContext;
     private int height;
@@ -13,6 +15,7 @@ public class ImageAdapter extends BaseAdapter {
     private int row;
     private int col;
     private Integer[] images;
+    private ArrayList<ImageView> imageViews;
 
     public ImageAdapter(Context c,int height, int width, int row, int col,Integer[] images) {
         mContext = c;
@@ -21,6 +24,7 @@ public class ImageAdapter extends BaseAdapter {
         this.row = row;
         this.col = col;
         this.images = images;
+        this.imageViews = new ArrayList<>();
     }
 
     public int getCount() {
@@ -35,6 +39,10 @@ public class ImageAdapter extends BaseAdapter {
         return images[position];
     }
 
+    public ArrayList<ImageView> getImageViews() {
+        return imageViews;
+    }
+
     // create a new ImageView for each item referenced by the Adapter
     public View getView(int position, View convertView, ViewGroup parent) {
         ImageView imageView;
@@ -44,6 +52,7 @@ public class ImageAdapter extends BaseAdapter {
             imageView.setLayoutParams(new ViewGroup.LayoutParams(width/row,height/col));
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             imageView.setPadding(7, 7, 7, 7);
+            imageViews.add(imageView);
         } else {
             imageView = (ImageView) convertView;
         }

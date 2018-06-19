@@ -16,13 +16,19 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.Stack;
+
+import tyrantgit.explosionfield.ExplosionField;
 
 
 public class GameActivity extends AppCompatActivity {
@@ -44,6 +50,11 @@ public class GameActivity extends AppCompatActivity {
     private Integer[] currentBackImagesReferences;
 
 
+    private ArrayList<ImageView> imageViews;
+    private ImageAdapter imageAdapter;
+    private Animation scaleAnim;
+    private Animation offsetAnim;
+    private ExplosionField explosionField;
 
     private GameBoard board;
     private int frontImageId = R.drawable.question;
@@ -69,6 +80,7 @@ public class GameActivity extends AppCompatActivity {
     public MemoryGameService.SensorBind binder;
     private Stack<ImageView>gameImageView;
     private  Intent serviceIntent;
+    private boolean state;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,10 +102,12 @@ public class GameActivity extends AppCompatActivity {
         currentSecond = time/INTERVAL;
         int height = constLayout.getLayoutParams().height;
         int width = constLayout.getLayoutParams().width;
-
+        offsetAnim = AnimationUtils.loadAnimation(this,R.anim.offset_anim);
+        explosionField = ExplosionField.attach2Window(this);
         textName.setText(name);
         myGrid.setNumColumns(rowNum);
-        myGrid.setAdapter(new ImageAdapter(this,height,width,rowNum,colNum,frontImagesReferences));
+        imageAdapter = new ImageAdapter(this,height,width,rowNum,colNum,frontImagesReferences);
+        myGrid.setAdapter(imageAdapter);
 
         myGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v,
@@ -122,7 +136,14 @@ public class GameActivity extends AppCompatActivity {
                 stopService(serviceIntent);
                 progBar.setProgress(100);
                 textTimer.setText(""+0);
-                showDialogMessage("Time over, please try again","Timer");
+                doAnimationTimeOver();
+                final Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        finish();
+                    }
+                },5000);
             }
         };
 
@@ -135,15 +156,32 @@ public class GameActivity extends AppCompatActivity {
         },900);
         serviceIntent = new Intent(this, MemoryGameService.class);
         bindService(serviceIntent, bindService, Context.BIND_AUTO_CREATE);
-        LocalBroadcastManager.getInstance(this).registerReceiver(msg, new IntentFilter(getString(R.string.change_str)));
+        LocalBroadcastManager.getInstance(this).registerReceiver(msg, new IntentFilter(getString(R.string.change)));
+        scaleAnim = AnimationUtils.loadAnimation(this,R.anim.scale);
+    }
+
+    public void doAnimationTimeOver(){
+        imageViews = imageAdapter.getImageViews();
+        for(int i=0;i<imageViews.size();i++){
+            explosionField.explode(textName);
+            explosionField.explode(textTimer);
+            explosionField.explode(progBar);
+            imageViews.get(i).startAnimation(offsetAnim);
+        }
+        GameActivity.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(GameActivity.this, "Time over, please try again", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private ServiceConnection bindService = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             binder = (MemoryGameService.SensorBind) iBinder;
-            isBind = true;
             binder.notifyService(getString(R.string.listen_message));
+            isBind = true;
         }
 
 
@@ -156,15 +194,11 @@ public class GameActivity extends AppCompatActivity {
     private BroadcastReceiver msg = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            boolean state = intent.getBooleanExtra(getString(R.string.right_str), true);
+            state = intent.getBooleanExtra(getString(R.string.move), true);
             if (state) {
                 return;
             }
             reverseImage();
-
-           // 1. UI activty sturcture: operate function on sturct list, imageview1.setResource(frontImage) , imageview2.setRe....
-            // logic : gameboard.flipBack , - imageDetail.setFlip(true), iamgedetail2.setFlip , setMatch
-
 
         }
 
@@ -219,8 +253,6 @@ public class GameActivity extends AppCompatActivity {
 
                 if (board.isSelectedImagesMatching()) {
                     results += points; // matching
-                    // add to sturct list.
-                    // gameboard.addimagedetails
                     gameImageView.push(imageViewSelected1);
                     gameImageView.push(imageViewSelected2);
                     if (checkWinGame()) {
@@ -230,7 +262,14 @@ public class GameActivity extends AppCompatActivity {
                             results=0;
                         resultIntent.putExtra("result", results+"");
                         setResult(RESULT_OK, resultIntent);
-                        showDialogMessage("You win!, your score is "+results,"Congratulations");
+                        doAnimationWin();
+                        final Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                finish();
+                            }
+                        },2700);
                     }
                 } else {
                     // do it in the background ;
@@ -247,6 +286,20 @@ public class GameActivity extends AppCompatActivity {
                     },800);
                 }
             }
+    }
+    public void doAnimationWin(){
+
+        imageViews = imageAdapter.getImageViews();
+        for(int i=0;i<imageViews.size();i++){
+            imageViews.get(i).startAnimation(scaleAnim);
+        }
+        GameActivity.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(GameActivity.this, "Winner, Your score is "+results, Toast.LENGTH_LONG).show();
+            }
+        });
+
     }
 
     public void reverseImage(){

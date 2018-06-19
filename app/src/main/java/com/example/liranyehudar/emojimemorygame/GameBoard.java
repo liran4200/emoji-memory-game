@@ -3,6 +3,7 @@ package com.example.liranyehudar.emojimemorygame;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Stack;
 
 /**
  * Created by liran yehudar on 4/10/2018.
@@ -16,6 +17,7 @@ public class GameBoard {
 
     private ImageDetails imageSelectedFirst;
     private ImageDetails imageSelectedSecond;
+    private Stack<ImageDetails> gameImageDetails;
 
     public GameBoard(int numOfImages) {
         this.numOfImages = numOfImages;
@@ -23,6 +25,7 @@ public class GameBoard {
         countImages = 0;
         imageSelectedFirst = null;
         imageSelectedSecond = null;
+        gameImageDetails = new Stack<>();
     }
 
     /**
@@ -60,6 +63,8 @@ public class GameBoard {
         if(imageSelectedFirst.equals(imageSelectedSecond)){
             imageSelectedFirst.setMatch(true);
             imageSelectedSecond.setMatch(true);
+            gameImageDetails.push(imageSelectedFirst);
+            gameImageDetails.push(imageSelectedSecond);
             imageSelectedFirst = null;
             imageSelectedSecond = null;
             return true;
@@ -67,6 +72,20 @@ public class GameBoard {
         return false;
     }
 
+    public void flipBack(){
+        ImageDetails imageDetails1, imageDetails2;
+
+        if(!gameImageDetails.isEmpty())
+        {
+            imageDetails2 = gameImageDetails.pop();
+            imageDetails1= gameImageDetails.pop();
+            imageDetails1.setFlipped(false);
+            imageDetails2.setFlipped(false);
+            imageDetails1.setMatch(false);
+            imageDetails2.setMatch(false);
+
+        }
+    }
     public void resetSelectedImages(){
         imageSelectedFirst.setFlipped(false);
         imageSelectedSecond.setFlipped(false);

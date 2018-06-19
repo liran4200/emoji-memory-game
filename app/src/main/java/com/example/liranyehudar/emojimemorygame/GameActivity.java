@@ -22,6 +22,8 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.util.Stack;
+
 
 public class GameActivity extends AppCompatActivity {
     final static int INTERVAL = 1000;
@@ -65,6 +67,8 @@ public class GameActivity extends AppCompatActivity {
     private int time;
     private boolean isBind = false;
     public MemoryGameService.SensorBind binder;
+    private Stack<ImageView>gameImageView;
+    private  Intent serviceIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +79,7 @@ public class GameActivity extends AppCompatActivity {
         frontImagesReferences = new Integer[numOfImages];
         currentBackImagesReferences = new Integer[numOfImages/2]; // num Of Images/2 - every image appear 2 times
         board = new GameBoard(numOfImages);
+        gameImageView = new Stack<>();
 
         initCurrentBackImages();
         initFrontImages();
@@ -114,6 +119,7 @@ public class GameActivity extends AppCompatActivity {
             @Override
             public void onFinish() {
                 i++;
+                stopService(serviceIntent);
                 progBar.setProgress(100);
                 textTimer.setText(""+0);
                 showDialogMessage("Time over, please try again","Timer");
@@ -127,7 +133,8 @@ public class GameActivity extends AppCompatActivity {
                 mCountDownTimer.start();
             }
         },900);
-        bindService(new Intent(this, MemoryGameService.class), bindService, Context.BIND_AUTO_CREATE);
+        serviceIntent = new Intent(this, MemoryGameService.class);
+        bindService(serviceIntent, bindService, Context.BIND_AUTO_CREATE);
         LocalBroadcastManager.getInstance(this).registerReceiver(msg, new IntentFilter(getString(R.string.change_str)));
     }
 
@@ -153,6 +160,7 @@ public class GameActivity extends AppCompatActivity {
             if (state) {
                 return;
             }
+            reverseImage();
 
            // 1. UI activty sturcture: operate function on sturct list, imageview1.setResource(frontImage) , imageview2.setRe....
             // logic : gameboard.flipBack , - imageDetail.setFlip(true), iamgedetail2.setFlip , setMatch
@@ -186,6 +194,7 @@ public class GameActivity extends AppCompatActivity {
      * @param position
      */
     public void checkBackImagesMatching(ImageView img,int position){
+
             if(isBusy)
                 return;
 
@@ -212,6 +221,8 @@ public class GameActivity extends AppCompatActivity {
                     results += points; // matching
                     // add to sturct list.
                     // gameboard.addimagedetails
+                    gameImageView.push(imageViewSelected1);
+                    gameImageView.push(imageViewSelected2);
                     if (checkWinGame()) {
                         mCountDownTimer.cancel(); // cancel timer
                         Intent resultIntent = new Intent();
@@ -236,6 +247,24 @@ public class GameActivity extends AppCompatActivity {
                     },800);
                 }
             }
+    }
+
+    public void reverseImage(){
+        ImageView imageView1, imageView2;
+
+        if(!gameImageView.isEmpty())
+        {
+            board.flipBack();
+            imageView2 = gameImageView.pop();
+            imageView1 = gameImageView.pop();
+
+            imageView1.setImageResource(frontImageId);
+            imageView2.setImageResource(frontImageId);
+
+            if(results > 0){
+                results = results - 5;
+            }
+        }
     }
 
     public boolean checkWinGame(){
@@ -266,6 +295,7 @@ public class GameActivity extends AppCompatActivity {
 
     public void onBackPressed() {
         mCountDownTimer.cancel();
+        stopService(serviceIntent);
        super.onBackPressed();
     }
 

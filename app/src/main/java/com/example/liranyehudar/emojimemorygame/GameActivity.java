@@ -249,8 +249,6 @@ public class GameActivity extends AppCompatActivity {
                 }
                 else return;
 
-
-
                 if (board.isSelectedImagesMatching()) {
                     results += points; // matching
                     gameImageView.push(imageViewSelected1);

@@ -27,6 +27,6 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
     implementation 'com.android.support:design:26.1.0'
     implementation 'de.codecrafters.tableview:tableview:2.8.0'
-    compile 'tyrantgit:explosionfield:1.0.1'
     implementation 'com.google.android.gms:play-services-maps:15.0.1'
+    compile'tyrantgit:explosionfield:1.0.1'
 }
